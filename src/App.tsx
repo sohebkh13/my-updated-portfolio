@@ -281,7 +281,7 @@ function App() {
       technologies: ["Python", "Pandas", "NumPy", "Scikit-learn", "Collaborative Filtering", "Content-based Filtering", "Machine Learning"]
     },
     {
-      period: "JUL 2024 — SEP 2025",
+      period: "JUL 2024 — SEP 2024",
       title: "Data Science Intern",
       company: "Technocolabs Softwares Inc.",
       link: "https://www.technocolabs.com/",
