@@ -102,7 +102,7 @@ const Archive: React.FC = () => {
                 {allProjects.map((project, index) => (
                   <tr 
                     key={index} 
-                    className="border-b transition-colors border-red-100 hover:bg-red-50/50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                    className="border-b border-red-100 dark:border-slate-800"
                   >
                     <td className="py-4 pr-8 align-top text-sm">
                       <div className="text-amber-700 dark:text-slate-500">{project.year}</div>
