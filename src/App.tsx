@@ -3,9 +3,11 @@ import {
   Github, 
   Linkedin, 
   ArrowUpRight,
-  X
+  Sun,
+  Moon
 } from 'lucide-react';
 import emailjs from '@emailjs/browser';
+import { useTheme } from './contexts/ThemeContext';
 
 // TypeScript interfaces for data types
 interface Experience {
@@ -27,7 +29,7 @@ interface Project {
 }
 
 // TypeWriter Animation Component
-const TypeWriter = ({ phrases }: { phrases: string[] }) => {
+const TypeWriter = ({ phrases, isDarkMode }: { phrases: string[]; isDarkMode: boolean }) => {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [currentText, setCurrentText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -75,8 +77,10 @@ const TypeWriter = ({ phrases }: { phrases: string[] }) => {
   
   return (
     <span className="inline-block">
-      <span>{currentText}</span>
-      <span className={`ml-0.5 font-medium text-yellow-400 ${showCursor ? 'opacity-100' : 'opacity-0'}`}>|</span>
+      <span className={isDarkMode ? 'text-slate-200' : 'text-red-800'}>{currentText}</span>
+      <span className={`ml-0.5 font-medium ${
+        isDarkMode ? 'text-yellow-400' : 'text-red-800'
+      } ${showCursor ? 'opacity-100' : 'opacity-0'}`}>|</span>
     </span>
   );
 };
@@ -90,7 +94,7 @@ const addArabicFont = () => {
 };
 
 // Arabic text hover component
-const ArabicHover = ({ children, arabicText }: { children: React.ReactNode, arabicText: string }) => {
+const ArabicHover = ({ children, arabicText, isDarkMode }: { children: React.ReactNode, arabicText: string, isDarkMode: boolean }) => {
   const [isHovered, setIsHovered] = useState(false);
   
   return (
@@ -101,18 +105,22 @@ const ArabicHover = ({ children, arabicText }: { children: React.ReactNode, arab
       onMouseLeave={() => setIsHovered(false)}
     >
       {isHovered ? (
-        <span className="text-yellow-400 font-medium animate-fadeIn" style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>
+        <span className={`font-medium animate-fadeIn ${
+          isDarkMode ? 'text-yellow-400' : 'text-red-800'
+        }`} style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>
           {arabicText}
         </span>
       ) : (
-        <span className="font-medium text-slate-200 border-b border-dotted border-yellow-400/40">{children}</span>
+        <span className={`font-medium border-b border-dotted ${
+          isDarkMode ? 'text-slate-200 border-yellow-400/40' : 'text-amber-950 border-red-800/40'
+        }`}>{children}</span>
       )}
     </span>
   );
 };
 
 // Text hover component for résumé links with Arabic translation
-const ResumeHover = ({ children, hoverText, link }: { children: React.ReactNode, hoverText: string, link: string }) => {
+const ResumeHover = ({ children, hoverText, link, isDarkMode }: { children: React.ReactNode, hoverText: string, link: string, isDarkMode: boolean }) => {
   const [isHovered, setIsHovered] = useState(false);
   
   return (
@@ -126,12 +134,16 @@ const ResumeHover = ({ children, hoverText, link }: { children: React.ReactNode,
       style={{ cursor: 'pointer' }}
     >
       {isHovered ? (
-        <span className="animate-fadeIn font-medium text-yellow-400" style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>
+        <span className={`animate-fadeIn font-medium ${
+          isDarkMode ? 'text-yellow-400' : 'text-red-800'
+        }`} style={{ fontFamily: "'Noto Sans Arabic', sans-serif" }}>
           {hoverText}
           <ArrowUpRight className="mr-1 inline-block h-4 w-4 shrink-0 transition-transform -translate-y-1 translate-x-1" />
         </span>
       ) : (
-        <span className="font-medium text-slate-200 border-b border-dotted border-yellow-400/40">
+        <span className={`font-medium border-b border-dotted ${
+          isDarkMode ? 'text-slate-200 border-yellow-400/40' : 'text-amber-950 border-red-800/40'
+        }`}>
           {children}
           <ArrowUpRight className="ml-1 inline-block h-4 w-4 shrink-0 transition-transform" />
         </span>
@@ -141,6 +153,7 @@ const ResumeHover = ({ children, hoverText, link }: { children: React.ReactNode,
 };
 
 function App() {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [activeSection, setActiveSection] = useState('about');
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [formData, setFormData] = useState({
@@ -331,12 +344,18 @@ function App() {
   // Other projects section removed
 
   return (
-    <div className="bg-black text-slate-400 min-h-screen ">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDarkMode 
+        ? 'bg-black text-slate-400' 
+        : 'bg-amber-50 text-amber-900'
+    }`}>
       {/* Cursor spotlight effect */}
       <div 
         className="pointer-events-none fixed inset-0 z-30 transition duration-300"
         style={{
-          background: `radial-gradient(600px at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 215, 0, 0.15), transparent 80%)`
+          background: isDarkMode 
+            ? `radial-gradient(600px at ${mousePosition.x}px ${mousePosition.y}px, rgba(255, 215, 0, 0.15), transparent 80%)`
+            : `radial-gradient(600px at ${mousePosition.x}px ${mousePosition.y}px, rgba(127, 29, 29, 0.1), transparent 80%)`
         }}
       />
 
@@ -345,11 +364,31 @@ function App() {
           {/* Left side - Fixed header */}
           <header className="lg:sticky lg:top-0 lg:flex lg:max-h-screen lg:w-1/2 lg:flex-col lg:justify-between lg:py-24">
             <div>
-              <h1 className="text-4xl font-bold tracking-tight text-slate-200 sm:text-5xl">
-                Soheb Khan
-              </h1>
-              <h2 className="mt-3 text-lg font-medium tracking-tight text-slate-200 sm:text-xl">
-                <TypeWriter phrases={["Senior Automation Engineer", "Aspiring Data Scientist"]} />
+              <div className="flex items-center justify-between mb-4">
+                <h1 className={`text-4xl font-bold tracking-tight sm:text-5xl ${
+                  isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                }`}>
+                  Soheb Khan
+                </h1>
+                
+                {/* Theme Toggle Button */}
+                <button
+                  onClick={toggleTheme}
+                  className={`p-3 rounded-full transition-all duration-300 hover:scale-110 mr-5 ${
+                    isDarkMode 
+                      ? 'bg-slate-800/50 text-yellow-400 hover:bg-slate-700/50' 
+                      : 'bg-red-100 text-red-800 hover:bg-red-200'
+                  }`}
+                  aria-label="Toggle theme"
+                >
+                  {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
+              </div>
+              
+              <h2 className={`mt-3 text-lg font-medium tracking-tight sm:text-xl ${
+                isDarkMode ? 'text-slate-200' : 'text-amber-950'
+              }`}>
+                <TypeWriter phrases={["Senior Automation Engineer", "Aspiring Data Scientist"]} isDarkMode={isDarkMode} />
               </h2>
               <p className="mt-4 max-w-xs leading-normal">
                 I bridge quality engineering and predictive analytics for robust solutions.
@@ -368,13 +407,13 @@ function App() {
                       >
                         <span className={`nav-indicator mr-4 h-px transition-all ${
                           activeSection === section 
-                            ? 'w-16 bg-slate-200' 
-                            : 'w-8 bg-slate-600 group-hover:w-16 group-hover:bg-slate-200'
+                            ? isDarkMode ? 'w-16 bg-slate-200' : 'w-16 bg-amber-950'
+                            : isDarkMode ? 'w-8 bg-slate-600 group-hover:w-16 group-hover:bg-slate-200' : 'w-8 bg-amber-300 group-hover:w-16 group-hover:bg-amber-950'
                         }`}></span>
                         <span className={`nav-text text-xs font-bold uppercase tracking-widest transition-colors ${
                           activeSection === section 
-                            ? 'text-slate-200' 
-                            : 'text-slate-500 group-hover:text-slate-200'
+                            ? isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                            : isDarkMode ? 'text-slate-500 group-hover:text-slate-200' : 'text-amber-600 group-hover:text-amber-950'
                         }`}>
                           {section}
                         </span>
@@ -389,7 +428,9 @@ function App() {
             <ul className="ml-1 mt-8 flex items-center" aria-label="Social media">
               <li className="mr-5 text-xs">
                 <a
-                  className="block hover:text-slate-200 transition-colors"
+                  className={`block transition-colors ${
+                    isDarkMode ? 'hover:text-slate-200' : 'hover:text-amber-950'
+                  }`}
                   href="https://github.com/sohebkh13"
                   target="_blank"
                   rel="noreferrer"
@@ -410,7 +451,9 @@ function App() {
               </li> */}
               <li className="mr-5 text-xs">
                 <a
-                  className="block hover:text-slate-200 transition-colors"
+                  className={`block transition-colors ${
+                    isDarkMode ? 'hover:text-slate-200' : 'hover:text-amber-950'
+                  }`}
                   href="https://www.linkedin.com/in/soheb-khan/"
                   target="_blank"
                   rel="noreferrer"
@@ -426,8 +469,12 @@ function App() {
           <main className="pt-24 lg:w-1/2 lg:py-24">
             {/* About section */}
             <section id="about" className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24">
-              <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-black/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
+              <div className={`sticky top-0 z-20 -mx-6 mb-4 w-screen px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0 ${
+                isDarkMode ? 'bg-black/75' : 'bg-amber-50/75'
+              }`}>
+                <h2 className={`text-sm font-bold uppercase tracking-widest lg:sr-only ${
+                  isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                }`}>
                   About
                 </h2>
               </div>
@@ -437,37 +484,49 @@ function App() {
                 </p>
                 <p className="mb-4">
                   Currently, I'm a Senior Automation Engineer at {" "}
-                  <a className="font-medium text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400" href="https://www.6dtechnologies.com/" target="_blank" rel="noreferrer">
+                  <a className={`font-medium transition-colors ${
+                    isDarkMode ? 'text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400' : 'text-amber-950 hover:text-red-800 focus-visible:text-red-800'
+                  }`} href="https://www.6dtechnologies.com/" target="_blank" rel="noreferrer">
                     6D Technologies
                   </a>
                   , specializing in data integrity and system validation. I contribute to ensuring bulletproof data pipelines and automated testing frameworks while actively building my expertise in machine learning and predictive analytics to transition into data science.
                   </p>
                   <p>
                    In the past, I've had the opportunity to work across diverse industries — from {" "}
-                  <a className="font-medium text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400" href="https://www.vodafone.co.uk/" target="_blank" rel="noreferrer">
+                  <a className={`font-medium transition-colors ${
+                    isDarkMode ? 'text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400' : 'text-amber-950 hover:text-red-800 focus-visible:text-red-800'
+                  }`} href="https://www.vodafone.co.uk/" target="_blank" rel="noreferrer">
                     telecom giants 
                   </a>
                   {" "}to{" "}
-                  <a className="font-medium text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400" href="https://aivariant.com/" target="_blank" rel="noreferrer">
+                  <a className={`font-medium transition-colors ${
+                    isDarkMode ? 'text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400' : 'text-amber-950 hover:text-red-800 focus-visible:text-red-800'
+                  }`} href="https://aivariant.com/" target="_blank" rel="noreferrer">
                     analytics firms
                   </a>
                   , and {" "}
-                  <a className="font-medium text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400" href="https://www.technocolabs.com/" target="_blank" rel="noreferrer">
+                  <a className={`font-medium transition-colors ${
+                    isDarkMode ? 'text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400' : 'text-amber-950 hover:text-red-800 focus-visible:text-red-800'
+                  }`} href="https://www.technocolabs.com/" target="_blank" rel="noreferrer">
                     consulting companies
                   </a>
                   . I've also developed multiple machine learning projects, including recommendation systems, classification models, and interactive web applications that demonstrate real-world ML implementations.
                 </p>
                 <br />
                 <p>
-                  In my spare time, I'm usually gaming, binge-watching treasure hunt series—there's something about the thrill of discovery that resonates with my data exploration mindset—or <ArabicHover arabicText="تعلم اللغة العربية">learning Arabic</ArabicHover>, because apparently I enjoy deciphering complex patterns whether they're in code or ancient scripts.
+                  In my spare time, I'm usually gaming, binge-watching treasure hunt series—there's something about the thrill of discovery that resonates with my data exploration mindset—or <ArabicHover arabicText="تعلم اللغة العربية" isDarkMode={isDarkMode}>learning Arabic</ArabicHover>, because apparently I enjoy deciphering complex patterns whether they're in code or ancient scripts.
                 </p>
               </div>
             </section>
 
             {/* Experience section */}
             <section id="experience" className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24">
-              <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-black/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
+              <div className={`sticky top-0 z-20 -mx-6 mb-4 w-screen px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0 ${
+                isDarkMode ? 'bg-black/75' : 'bg-amber-50/75'
+              }`}>
+                <h2 className={`text-sm font-bold uppercase tracking-widest lg:sr-only ${
+                  isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                }`}>
                   Experience
                 </h2>
               </div>
@@ -475,15 +534,23 @@ function App() {
                 <ol className="group/list">
                   {experiences.map((exp, index) => (
                     <li key={index} className="mb-12">
-                      <div className="group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
-                        <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
-                        <header className="z-10 mb-2 mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500 sm:col-span-2">
+                      <div className={`group relative grid pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50`}>
+                        <div className={`absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block ${
+                          isDarkMode ? 'lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)]' : 'lg:group-hover:bg-red-50/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(127,29,29,0.1)]'
+                        } lg:group-hover:drop-shadow-lg`}></div>
+                        <header className={`z-10 mb-2 mt-1 text-xs font-semibold uppercase tracking-wide sm:col-span-2 ${
+                          isDarkMode ? 'text-slate-500' : 'text-amber-700'
+                        }`}>
                           {exp.period}
                         </header>
                         <div className="z-10 sm:col-span-6">
-                          <h3 className="font-medium leading-snug text-slate-200">
+                          <h3 className={`font-medium leading-snug ${
+                            isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                          }`}>
                             <div>
-                              <a className="inline-flex items-baseline font-medium leading-tight text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400 group/link text-base" href={exp.link} target="_blank" rel="noreferrer">
+                              <a className={`inline-flex items-baseline font-medium leading-tight group/link text-base ${
+                                isDarkMode ? 'text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400' : 'text-amber-950 hover:text-red-800 focus-visible:text-red-800'
+                              }`} href={exp.link} target="_blank" rel="noreferrer">
                                 <span className="absolute -inset-x-4 -inset-y-2.5 hidden rounded md:-inset-x-6 md:-inset-y-4 lg:block"></span>
                                 <span>
                                   {exp.title} ·{" "}
@@ -499,7 +566,9 @@ function App() {
                           <ul className="mt-2 flex flex-wrap" aria-label="Technologies used">
                             {exp.technologies.map((tech, techIndex) => (
                               <li key={techIndex} className="mr-1.5 mt-2">
-                                <div className="flex items-center rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-medium leading-5 text-yellow-400">
+                                <div className={`flex items-center rounded-full px-3 py-1 text-xs font-medium leading-5 ${
+                                  isDarkMode ? 'bg-yellow-400/10 text-yellow-400' : 'bg-red-800/10 text-red-800'
+                                }`}>
                                   {tech}
                                 </div>
                               </li>
@@ -514,6 +583,7 @@ function App() {
                   <ResumeHover
                     hoverText="عرض السيرة الذاتية لضمان الجودة"
                     link="https://drive.google.com/file/d/10mvznbnSkRxvUfLEC0KLHP_mTtBJKq5p/view?usp=sharing"
+                    isDarkMode={isDarkMode}
                   >
                     View QA Résumé
                   </ResumeHover>
@@ -521,6 +591,7 @@ function App() {
                   <ResumeHover
                     hoverText="عرض السيرة الذاتية لعلوم البيانات"
                     link="https://drive.google.com/file/d/1trRn7XQ7mDGJf3uU18NrYmjTBOEIKMo5/view?usp=sharing"
+                    isDarkMode={isDarkMode}
                   >
                     View Data Science Résumé
                   </ResumeHover>
@@ -530,8 +601,12 @@ function App() {
 
             {/* Work section */}
             <section id="work" className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24">
-              <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-black/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
+              <div className={`sticky top-0 z-20 -mx-6 mb-4 w-screen px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0 ${
+                isDarkMode ? 'bg-black/75' : 'bg-amber-50/75'
+              }`}>
+                <h2 className={`text-sm font-bold uppercase tracking-widest lg:sr-only ${
+                  isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                }`}>
                   Selected Work
                 </h2>
               </div>
@@ -540,10 +615,14 @@ function App() {
                   {projects.map((project, index) => (
                     <li key={index} className="mb-12">
                       <div className="group relative grid gap-4 pb-1 transition-all sm:grid-cols-8 sm:gap-8 md:gap-4 lg:hover:!opacity-100 lg:group-hover/list:opacity-50">
-                        <div className="absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:group-hover:drop-shadow-lg"></div>
+                        <div className={`absolute -inset-x-4 -inset-y-4 z-0 hidden rounded-md transition motion-reduce:transition-none lg:-inset-x-6 lg:block ${
+                          isDarkMode ? 'lg:group-hover:bg-slate-800/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)]' : 'lg:group-hover:bg-red-50/50 lg:group-hover:shadow-[inset_0_1px_0_0_rgba(127,29,29,0.1)]'
+                        } lg:group-hover:drop-shadow-lg`}></div>
                         <div className="z-10 sm:order-2 sm:col-span-6">
                           <h3>
-                            <a className="inline-flex items-baseline font-medium leading-tight text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400 group/link text-base" href={project.external} target="_blank" rel="noreferrer">
+                            <a className={`inline-flex items-baseline font-medium leading-tight group/link text-base ${
+                              isDarkMode ? 'text-slate-200 hover:text-yellow-400 focus-visible:text-yellow-400' : 'text-amber-950 hover:text-red-800 focus-visible:text-red-800'
+                            }`} href={project.external} target="_blank" rel="noreferrer">
                               <span className="absolute -inset-x-4 -inset-y-2.5 hidden rounded md:-inset-x-6 md:-inset-y-4 lg:block"></span>
                               <span>
                                 {project.title}
@@ -555,22 +634,30 @@ function App() {
                           <ul className="mt-2 flex flex-wrap" aria-label="Technologies used">
                             {project.technologies.map((tech, techIndex) => (
                               <li key={techIndex} className="mr-1.5 mt-2">
-                                <div className="flex items-center rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-medium leading-5 text-yellow-400">
+                                <div className={`flex items-center rounded-full px-3 py-1 text-xs font-medium leading-5 ${
+                                  isDarkMode ? 'bg-yellow-400/10 text-yellow-400' : 'bg-red-800/10 text-red-800'
+                                }`}>
                                   {tech}
                                 </div>
                               </li>
                             ))}
                           </ul>
                         </div>
-                        <img alt={project.title} loading="lazy" width="200" height="48" decoding="async" className="rounded border-2 border-slate-200/10 transition group-hover:border-slate-200/30 sm:order-1 sm:col-span-2 sm:translate-y-1" src={project.image} />
+                        <img alt={project.title} loading="lazy" width="200" height="48" decoding="async" className={`rounded border-2 transition sm:order-1 sm:col-span-2 sm:translate-y-1 ${
+                          isDarkMode ? 'border-slate-200/10 group-hover:border-slate-200/30' : 'border-red-800/10 group-hover:border-red-800/30'
+                        }`} src={project.image} />
                       </div>
                     </li>
                   ))}
                 </ul>
                 <div className="mt-12">
-                  <a className="inline-flex items-center font-medium leading-tight text-slate-200 font-semibold text-slate-200 group" href="/archive">
+                  <a className={`inline-flex items-center font-medium leading-tight font-semibold group ${
+                    isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                  }`} href="/archive">
                     <span>
-                      <span className="border-b border-transparent pb-px transition group-hover:border-yellow-400 motion-reduce:transition-none">
+                      <span className={`border-b border-transparent pb-px transition motion-reduce:transition-none ${
+                        isDarkMode ? 'group-hover:border-yellow-400' : 'group-hover:border-red-800'
+                      }`}>
                         View Full Project Archive
                       </span>
                       <ArrowUpRight className="ml-1 inline-block h-4 w-4 shrink-0 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 group-focus-visible:-translate-y-1 group-focus-visible:translate-x-1 motion-reduce:transition-none" />
@@ -582,31 +669,49 @@ function App() {
 
             {/* Writing section */}
             <section id="writing" className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24">
-              <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-black/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
+              <div className={`sticky top-0 z-20 -mx-6 mb-4 w-screen px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0 ${
+                isDarkMode ? 'bg-black/75' : 'bg-amber-50/75'
+              }`}>
+                <h2 className={`text-sm font-bold uppercase tracking-widest lg:sr-only ${
+                  isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                }`}>
                   Writing
                 </h2>
               </div>
               <div>
-                <div className="group relative rounded-md transition-all lg:hover:bg-slate-800/50 lg:hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)] lg:hover:drop-shadow-lg p-6">
-                  <h3 className="text-xl font-medium text-slate-200 mb-4">
+                <div className={`group relative rounded-md transition-all p-6 ${
+                  isDarkMode ? 'lg:hover:bg-slate-800/50 lg:hover:shadow-[inset_0_1px_0_0_rgba(148,163,184,0.1)]' : 'lg:hover:bg-red-50/50 lg:hover:shadow-[inset_0_1px_0_0_rgba(127,29,29,0.1)]'
+                } lg:hover:drop-shadow-lg`}>
+                  <h3 className={`text-xl font-medium mb-4 ${
+                    isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                  }`}>
                     Blog Posts Coming Soon
                   </h3>
-                  <p className="text-slate-400 mb-6">
+                  <p className={`mb-6 ${
+                    isDarkMode ? 'text-slate-400' : 'text-amber-700'
+                  }`}>
                     I'm currently working on some exciting articles about machine learning, data science, and test automation. 
                     Stay tuned for in-depth technical tutorials, project analyses, and industry insights.
                   </p>
                   <div className="flex flex-wrap gap-3">
-                    <span className="flex items-center rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-medium leading-5 text-yellow-400">
+                    <span className={`flex items-center rounded-full px-3 py-1 text-xs font-medium leading-5 ${
+                      isDarkMode ? 'bg-yellow-400/10 text-yellow-400' : 'bg-red-800/10 text-red-800'
+                    }`}>
                       Machine Learning
                     </span>
-                    <span className="flex items-center rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-medium leading-5 text-yellow-400">
+                    <span className={`flex items-center rounded-full px-3 py-1 text-xs font-medium leading-5 ${
+                      isDarkMode ? 'bg-yellow-400/10 text-yellow-400' : 'bg-red-800/10 text-red-800'
+                    }`}>
                       Data Science
                     </span>
-                    <span className="flex items-center rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-medium leading-5 text-yellow-400">
+                    <span className={`flex items-center rounded-full px-3 py-1 text-xs font-medium leading-5 ${
+                      isDarkMode ? 'bg-yellow-400/10 text-yellow-400' : 'bg-red-800/10 text-red-800'
+                    }`}>
                       Test Automation
                     </span>
-                    <span className="flex items-center rounded-full bg-yellow-400/10 px-3 py-1 text-xs font-medium leading-5 text-yellow-400">
+                    <span className={`flex items-center rounded-full px-3 py-1 text-xs font-medium leading-5 ${
+                      isDarkMode ? 'bg-yellow-400/10 text-yellow-400' : 'bg-red-800/10 text-red-800'
+                    }`}>
                       Python
                     </span>
                   </div>
@@ -618,15 +723,21 @@ function App() {
 
             {/* Contact section */}
             <section id="contact" className="mb-16 scroll-mt-16 md:mb-24 lg:mb-36 lg:scroll-mt-24">
-              <div className="sticky top-0 z-20 -mx-6 mb-4 w-screen bg-black/75 px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0">
-                <h2 className="text-sm font-bold uppercase tracking-widest text-slate-200 lg:sr-only">
+              <div className={`sticky top-0 z-20 -mx-6 mb-4 w-screen px-6 py-5 backdrop-blur md:-mx-12 md:px-12 lg:sr-only lg:relative lg:top-auto lg:mx-auto lg:w-full lg:px-0 lg:py-0 lg:opacity-0 ${
+                isDarkMode ? 'bg-black/75' : 'bg-amber-50/75'
+              }`}>
+                <h2 className={`text-sm font-bold uppercase tracking-widest lg:sr-only ${
+                  isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                }`}>
                   Contact
                 </h2>
               </div>
               <div>
                 <form onSubmit={handleSubmit} className="max-w-md space-y-6">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-slate-200 mb-2">
+                    <label htmlFor="name" className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                    }`}>
                       Name
                     </label>
                     <input
@@ -637,13 +748,19 @@ function App() {
                       onChange={handleInputChange}
                       autoComplete="off"
                       required
-                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-colors"
+                      className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                        isDarkMode 
+                          ? 'bg-slate-800/50 border-slate-600 text-slate-200 placeholder-slate-400 focus:ring-yellow-400' 
+                          : 'bg-amber-50/50 border-red-200 text-amber-950 placeholder-amber-600 focus:ring-red-800'
+                      }`}
                       placeholder="Your name"
                     />
                   </div>
                   
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-2">
+                    <label htmlFor="email" className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                    }`}>
                       Email
                     </label>
                     <input
@@ -654,13 +771,19 @@ function App() {
                       onChange={handleInputChange}
                       autoComplete="off"
                       required
-                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-colors"
+                      className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                        isDarkMode 
+                          ? 'bg-slate-800/50 border-slate-600 text-slate-200 placeholder-slate-400 focus:ring-yellow-400' 
+                          : 'bg-amber-50/50 border-red-200 text-amber-950 placeholder-amber-600 focus:ring-red-800'
+                      }`}
                       placeholder="your.email@example.com"
                     />
                   </div>
                   
                   <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-slate-200 mb-2">
+                    <label htmlFor="title" className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                    }`}>
                       Title
                     </label>
                     <input
@@ -671,13 +794,19 @@ function App() {
                       onChange={handleInputChange}
                       autoComplete="off"
                       required
-                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-colors"
+                      className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                        isDarkMode 
+                          ? 'bg-slate-800/50 border-slate-600 text-slate-200 placeholder-slate-400 focus:ring-yellow-400' 
+                          : 'bg-amber-50/50 border-red-200 text-amber-950 placeholder-amber-600 focus:ring-red-800'
+                      }`}
                       placeholder="Subject/Title of your message"
                     />
                   </div>
                   
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-slate-200 mb-2">
+                    <label htmlFor="message" className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                    }`}>
                       Message
                     </label>
                     <textarea
@@ -688,7 +817,11 @@ function App() {
                       autoComplete="off"
                       required
                       rows={5}
-                      className="w-full px-4 py-3 bg-slate-800/50 border border-slate-600 rounded-md text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-colors resize-none"
+                      className={`w-full px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent transition-colors resize-none ${
+                        isDarkMode 
+                          ? 'bg-slate-800/50 border-slate-600 text-slate-200 placeholder-slate-400 focus:ring-yellow-400' 
+                          : 'bg-amber-50/50 border-red-200 text-amber-950 placeholder-amber-600 focus:ring-red-800'
+                      }`}
                       placeholder="Your message..."
                     />
                   </div>
@@ -710,13 +843,19 @@ function App() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className={`relative px-6 py-3 bg-yellow-400/10 border border-yellow-400/20 rounded-md text-yellow-400 font-medium hover:bg-yellow-400/20 hover:border-yellow-400/40 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black transition-all ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      className={`relative px-6 py-3 border rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
+                        isDarkMode 
+                          ? 'bg-yellow-400/10 border-yellow-400/20 text-yellow-400 hover:bg-yellow-400/20 hover:border-yellow-400/40 focus:ring-yellow-400 focus:ring-offset-black' 
+                          : 'bg-red-800/10 border-red-800/20 text-red-800 hover:bg-red-800/20 hover:border-red-800/40 focus:ring-red-800 focus:ring-offset-amber-50'
+                      } ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
                       {isSubmitting ? (
                         <>
                           <span className="opacity-0">Send Message</span>
                           <span className="absolute inset-0 flex items-center justify-center">
-                            <svg className="animate-spin h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg className={`animate-spin h-5 w-5 ${
+                              isDarkMode ? 'text-yellow-400' : 'text-red-800'
+                            }`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
@@ -730,14 +869,22 @@ function App() {
                     <button
                       type="button"
                       onClick={handleRefresh}
-                      className="px-6 py-3 bg-slate-600/20 border border-slate-600/40 rounded-md text-slate-300 font-medium hover:bg-slate-600/30 hover:border-slate-600/60 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-black transition-all"
+                      className={`px-6 py-3 border rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
+                        isDarkMode 
+                          ? 'bg-slate-600/20 border-slate-600/40 text-slate-300 hover:bg-slate-600/30 hover:border-slate-600/60 focus:ring-slate-400 focus:ring-offset-black' 
+                          : 'bg-amber-200/50 border-amber-400/40 text-amber-800 hover:bg-amber-200/70 hover:border-amber-400/60 focus:ring-amber-600 focus:ring-offset-amber-50'
+                      }`}
                     >
                       Clear Form
                     </button>
                     
-                    <a className="inline-flex items-center font-medium leading-tight text-slate-200 font-semibold text-slate-200 group" href="https://www.linkedin.com/in/soheb-khan/">
+                    <a className={`inline-flex items-center font-medium leading-tight font-semibold group ${
+                      isDarkMode ? 'text-slate-200' : 'text-amber-950'
+                    }`} href="https://www.linkedin.com/in/soheb-khan/">
                       <span>
-                        <span className="border-b border-transparent pb-px transition group-hover:border-yellow-400 motion-reduce:transition-none">
+                        <span className={`border-b border-transparent pb-px transition motion-reduce:transition-none ${
+                          isDarkMode ? 'group-hover:border-yellow-400' : 'group-hover:border-red-800'
+                        }`}>
                           Say Hello
                         </span>
                         <ArrowUpRight className="ml-1 inline-block h-4 w-4 shrink-0 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 group-focus-visible:-translate-y-1 group-focus-visible:translate-x-1 motion-reduce:transition-none" />
@@ -748,10 +895,14 @@ function App() {
               </div>
             </section>
 
-            <footer className="max-w-md pb-16 text-sm text-slate-500 sm:pb-0">
+            <footer className={`max-w-md pb-16 text-sm sm:pb-0 ${
+              isDarkMode ? 'text-slate-500' : 'text-amber-700'
+            }`}>
               <p>
                 Design inspired by{" "}
-                <a href="https://brittanychiang.com/" className="font-medium text-slate-400 hover:text-yellow-400 focus-visible:text-yellow-400" target="_blank" rel="noreferrer">
+                <a href="https://brittanychiang.com/" className={`font-medium transition-colors ${
+                  isDarkMode ? 'text-slate-400 hover:text-yellow-400 focus-visible:text-yellow-400' : 'text-black hover:text-red-800 focus-visible:text-red-800'
+                }`} target="_blank" rel="noreferrer">
                   Brittany Chiang
                 </a>{" "}
                 — brilliant & elegant.
