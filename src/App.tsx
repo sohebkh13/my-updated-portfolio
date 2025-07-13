@@ -6,6 +6,7 @@ import {
   Sun,
   Moon
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import emailjs from '@emailjs/browser';
 import { useTheme } from './contexts/ThemeContext';
 
@@ -651,9 +652,9 @@ function App() {
                   ))}
                 </ul>
                 <div className="mt-12">
-                  <a className={`inline-flex items-center font-medium leading-tight font-semibold group ${
+                  <Link to="/archive" className={`inline-flex items-center font-medium leading-tight font-semibold group ${
                     isDarkMode ? 'text-slate-200' : 'text-amber-950'
-                  }`} href="/archive">
+                  }`}>
                     <span>
                       <span className={`border-b border-transparent pb-px transition motion-reduce:transition-none ${
                         isDarkMode ? 'group-hover:border-yellow-400' : 'group-hover:border-red-800'
@@ -662,7 +663,7 @@ function App() {
                       </span>
                       <ArrowUpRight className="ml-1 inline-block h-4 w-4 shrink-0 transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 group-focus-visible:-translate-y-1 group-focus-visible:translate-x-1 motion-reduce:transition-none" />
                     </span>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </section>
